@@ -214,8 +214,12 @@ export default function PartScatterChart({ data, part, state: initialState }: Pa
   // Calculate total part count (unique serials for this part)
   const uniqueSerials = new Set(filteredData.map(p => p.serial));
   const totalPartCount = uniqueSerials.size;
+  
+  // Check if we have any data with fixture measurements
+  const dataWithMeasurements = filteredData.filter(p => p.measurement !== null && p.measurement !== undefined);
+  const hasMeasurements = dataWithMeasurements.length > 0;
 
-  // Don't return early if filteredData is empty - show empty graph instead
+  // Don't return early if filteredData is empty - show empty graph or warning instead
 
   // Group filtered data by position (airgap measurement point) for charting
   const positionGroupsFiltered = new Map<string, AirgapPoint[]>();
@@ -351,6 +355,33 @@ export default function PartScatterChart({ data, part, state: initialState }: Pa
   // Check if both pre and post data exist
   const hasPreData = data.some(p => p.part === part && p.state === 'pre' && p.value !== null);
   const hasPostData = data.some(p => p.part === part && p.state === 'post' && p.value !== null);
+
+  // If there's data but no fixture measurements, show warning
+  if (filteredData.length > 0 && !hasMeasurements) {
+    return (
+      <div className="rounded-lg shadow-sm border-2 border-red-400 p-6" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 242, 242, 0.98) 100%)' }}>
+        <h3 className="text-lg font-semibold text-red-900 mb-2">
+          Part Type {PART_TO_NEST_MAP[part] || '?'}: {part} ({currentState === 'pre' ? 'Pre' : 'Post'} Toggle)
+        </h3>
+        <div className="p-4 bg-red-50 border border-red-300 rounded">
+          <p className="text-red-700 font-medium mb-2">⚠️ No Fixture Measurements Available</p>
+          <p className="text-sm text-red-600">
+            Found {filteredData.length} data points for this part, but none have fixture measurement values.
+            <br />
+            <br />
+            <strong>This usually means:</strong>
+            <br />
+            • The checked fixture file doesn't have matching serial numbers, OR
+            <br />
+            • The fixture measurements in the checked fixture file are outside the valid range (-0.80 to 0.80)
+            <br />
+            <br />
+            Please check the console logs for more details about serial number matching and measurement validation.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg shadow-sm border-2 border-blue-400 p-6" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.98) 100%)' }}>

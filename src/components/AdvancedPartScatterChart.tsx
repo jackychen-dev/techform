@@ -252,6 +252,10 @@ export default function AdvancedPartScatterChart({ data, part, state: initialSta
   // Calculate total part count (unique serials for this part)
   const uniqueSerials = new Set(filteredData.map(p => p.serial));
   const totalPartCount = uniqueSerials.size;
+  
+  // Check if we have any data with fixture measurements
+  const dataWithMeasurements = filteredData.filter(p => p.measurement !== null && p.measurement !== undefined);
+  const hasMeasurements = dataWithMeasurements.length > 0;
 
   // Group filtered data by position for charting
   const positionGroupsFiltered = new Map<string, AirgapPoint[]>();
@@ -397,6 +401,23 @@ export default function AdvancedPartScatterChart({ data, part, state: initialSta
     
     setComparisonFilters(updated);
   };
+
+  // If there's data but no fixture measurements, show warning
+  if (filteredData.length > 0 && !hasMeasurements) {
+    return (
+      <div className="rounded-lg shadow-sm border-2 border-red-400 p-6" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 242, 242, 0.98) 100%)' }}>
+        <h3 className="text-lg font-semibold text-red-900 mb-2">
+          Part Type {PART_TO_NEST_MAP[part] || '?'}: {part} ({currentState === 'pre' ? 'Pre' : 'Post'} Toggle)
+        </h3>
+        <div className="p-4 bg-red-50 border border-red-300 rounded">
+          <p className="text-red-700 font-medium mb-2">⚠️ No Fixture Measurements Available</p>
+          <p className="text-sm text-red-600">
+            Found {filteredData.length} data points for this part, but none have fixture measurement values.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg shadow-sm border-2 border-purple-400 p-6" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.98) 100%)' }}>
