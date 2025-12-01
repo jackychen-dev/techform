@@ -148,7 +148,7 @@ function findNestPositions(worksheet: XLSX.WorkSheet, sheetName: string): Map<nu
  * - Nest numbers at row 13 in various columns (D13, I13, N13, etc.)
  * - Measurement value directly below nest number (row 14+)
  * - Serial number to the right of measurement (typically F14 for Nest 3)
- * - Airgap values in columns N, O, P, Q
+ * - Airgap values in columns P, Q, R, S
  */
 export function parseCheckedFixtureSheet(
   worksheet: XLSX.WorkSheet,
@@ -187,8 +187,8 @@ export function parseCheckedFixtureSheet(
   
   console.log(`Using row ${headerRow} as header row for sheet "${sheetName}"`);
   
-  // Airgap columns (N, O, P, Q) - these contain the actual airgap values
-  const airgapCols = ['N', 'O', 'P', 'Q'];
+  // Airgap columns (P, Q, R, S) - these contain the actual airgap values
+  const airgapCols = ['P', 'Q', 'R', 'S'];
   
   // Find the data range - look for rows with data starting from headerRow + 1
   const dataStartRow = headerRow + 1;
@@ -395,7 +395,7 @@ export function parseCheckedFixtureSheet(
         console.log(`Measurement extraction for Nest ${nestNum} at ${nestCol}${row}:`, JSON.stringify(debugInfo, null, 2));
       }
       
-      // Get airgap sensor readings from columns N, O, P, Q
+      // Get airgap sensor readings from columns P, Q, R, S
       // These are the Y-axis values (can be larger numbers, not restricted to -0.80 to 0.80)
       // Only exclude serial numbers (integers >= 1000)
       for (const airgapCol of airgapCols) {
@@ -442,7 +442,7 @@ export function parseCheckedFixtureSheet(
         sheetName: sheetName,
         rawRow: undefined, // We'll preserve the raw row if needed
         fixtureMeasurement: validMeasurement, // Store fixture measurement for X-axis (from nest column)
-        ...airgapValues, // Spread airgap values as properties (N, O, P, Q)
+        ...airgapValues, // Spread airgap values as properties (P, Q, R, S)
       };
       
       results.push(rowData);

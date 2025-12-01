@@ -28,11 +28,11 @@ export const VALID_PARTS = [
   "RRU", "RRL", "RLU", "RLL"
 ];
 
-// Pre-toggle airgap columns (N, O, P, Q)
-export const PRE_TOGGLE_COLS = ["N", "O", "P", "Q"];
+// Pre-toggle airgap columns (P, Q, R, S)
+export const PRE_TOGGLE_COLS = ["P", "Q", "R", "S"];
 
-// Post-toggle airgap columns (R, S, T, U, V)
-export const POST_TOGGLE_COLS = ["R", "S", "T", "U", "V"];
+// Post-toggle airgap columns (T, U, V, W)
+export const POST_TOGGLE_COLS = ["T", "U", "V", "W"];
 
 // File name patterns
 export const TECHFORM_FILE_PREFIX = "Techform Read Probe Values";

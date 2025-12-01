@@ -98,16 +98,16 @@ export function mergeData(
       exactMatchCount++;
       
       // Merge the data
-      // IMPORTANT: Preserve raw airgap columns (N, O, P, Q) from techformItem
+      // IMPORTANT: Preserve raw airgap columns (P, Q, R, S, T, U, V, W) from techformItem
       // Only take fixtureMeasurement, sourceFile, sheetName from eclipseItem
       // Do NOT let eclipseItem overwrite the airgap sensor readings!
-      const { N: eclipseN, O: eclipseO, P: eclipseP, Q: eclipseQ, R: eclipseR, S: eclipseS, T: eclipseT, U: eclipseU, V: eclipseV, ...eclipseMetadata } = eclipseItem;
+      const { P: eclipseP, Q: eclipseQ, R: eclipseR, S: eclipseS, T: eclipseT, U: eclipseU, V: eclipseV, W: eclipseW, ...eclipseMetadata } = eclipseItem;
       
       const mergedItem: MergedData = {
         preToggle: {},
         postToggle: {},
         rawRow: techformItem.rawRow || eclipseItem.rawRow,
-        ...techformItem, // Preserve all raw airgap data (has serial, part, measurements N, O, P, Q, R, S, T, U)
+        ...techformItem, // Preserve all raw airgap data (has serial, part, measurements P, Q, R, S, T, U, V, W)
         ...eclipseMetadata, // Only overlay metadata (sourceFile, sheetName, fixtureMeasurement) - NOT airgap columns
       };
       

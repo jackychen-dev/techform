@@ -140,13 +140,14 @@ export async function parseTechformFile(file: File): Promise<TechformData[]> {
         }
 
         // Raw airgap file structure:
-        // Column A (index 0): Part Type/Nest Number
-        // Column B (index 1): Serial Number
-        // Columns N, O, P, Q: Airgap values
+        // Column C (index 2): Serial Number
+        // Column D (index 3): Part Type/Nest Number
+        // Columns P, Q, R, S: Pre-toggle airgap values
+        // Columns T, U, V, W: Post-toggle airgap values
         
-        // Use column B directly for serial numbers (index 1)
-        const serialColIndex = 1; // Column B
-        const nestColIndex = 0; // Column A (Part Type/Nest Number)
+        // Use column C directly for serial numbers (index 2)
+        const serialColIndex = 2; // Column C
+        const nestColIndex = 3; // Column D (Part Type/Nest Number)
         
         // Also find by name as fallback for validation
         const firstRow = rows[0];
@@ -163,20 +164,21 @@ export async function parseTechformFile(file: File): Promise<TechformData[]> {
         
         // Log what we're using
         console.log(`📋 Raw airgap file structure:`);
-        console.log(`  - Column A (index ${nestColIndex}): Part Type/Nest Number`);
-        console.log(`  - Column B (index ${serialColIndex}): Serial Number`);
-        console.log(`  - Columns N, O, P, Q: Airgap values`);
+        console.log(`  - Column C (index ${serialColIndex}): Serial Number`);
+        console.log(`  - Column D (index ${nestColIndex}): Part Type/Nest Number`);
+        console.log(`  - Columns P, Q, R, S: Pre-toggle airgap values`);
+        console.log(`  - Columns T, U, V, W: Post-toggle airgap values`);
         
         // Debug: show first few raw rows to verify structure
         if (rawRows.length > 1) {
           console.log(`Sample raw rows (first 3):`, rawRows.slice(0, 3).map((row, idx) => ({
             rowIndex: idx,
-            columnA: row[0],
-            columnB: row[1],
-            columnN: row[13],
-            columnO: row[14],
+            columnC: row[2],
+            columnD: row[3],
             columnP: row[15],
-            columnQ: row[16]
+            columnQ: row[16],
+            columnR: row[17],
+            columnS: row[18]
           })));
         }
 
@@ -189,20 +191,20 @@ export async function parseTechformFile(file: File): Promise<TechformData[]> {
           return colIndex - 1;
         };
 
-        // Get indices for columns N, O, P, Q (pre-toggle) and R, S, T, U (post-toggle)
+        // Get indices for columns P, Q, R, S (pre-toggle) and T, U, V, W (post-toggle)
         const airgapColIndices = {
-          N: columnLetterToIndex('N'), // 13
-          O: columnLetterToIndex('O'), // 14
           P: columnLetterToIndex('P'), // 15
           Q: columnLetterToIndex('Q'), // 16
           R: columnLetterToIndex('R'), // 17
           S: columnLetterToIndex('S'), // 18
           T: columnLetterToIndex('T'), // 19
           U: columnLetterToIndex('U'), // 20
+          V: columnLetterToIndex('V'), // 21
+          W: columnLetterToIndex('W'), // 22
         };
 
-        // Map rows with ONLY columns N, O, P, Q from raw data
-        // Use rawRows to access by column index (A=0, B=1, N=13, O=14, P=15, Q=16)
+        // Map rows with ONLY columns P, Q, R, S, T, U, V, W from raw data
+        // Use rawRows to access by column index (C=2, D=3, P=15, Q=16, R=17, S=18, T=19, U=20, V=21, W=22)
         const parsed: TechformData[] = rows.map((_row, index) => {
           // rawRows[0] is the header row, so data starts at rawRows[1]
           const rawRow = rawRows[index + 1] || []; // +1 to skip header row
@@ -315,8 +317,8 @@ export async function parseTechformFile(file: File): Promise<TechformData[]> {
             console.log(`Nest 6/8 Debug - Row ${index + 1}: partValue="${partValue}", part="${part}", serial="${serial}", colA="${rawRow[0]}", colB="${rawRow[1]}"`);
           }
           
-          // Extract ONLY columns N, O, P, Q from raw row
-          // Validate that values are airgap measurements (-0.80 to 0.80), not serial numbers
+          // Extract ONLY columns P, Q, R, S, T, U, V, W from raw row
+          // Validate that values are airgap measurements, not serial numbers
           // rawRow is already defined above, so we can use it here
           
           const validateAirgapValue = (value: any): number | null => {
@@ -330,29 +332,29 @@ export async function parseTechformFile(file: File): Promise<TechformData[]> {
           };
           
           const airgapValues: { [key: string]: number | null } = {
-            N: validateAirgapValue(rawRow[airgapColIndices.N]),
-            O: validateAirgapValue(rawRow[airgapColIndices.O]),
             P: validateAirgapValue(rawRow[airgapColIndices.P]),
             Q: validateAirgapValue(rawRow[airgapColIndices.Q]),
             R: validateAirgapValue(rawRow[airgapColIndices.R]),
             S: validateAirgapValue(rawRow[airgapColIndices.S]),
             T: validateAirgapValue(rawRow[airgapColIndices.T]),
             U: validateAirgapValue(rawRow[airgapColIndices.U]),
+            V: validateAirgapValue(rawRow[airgapColIndices.V]),
+            W: validateAirgapValue(rawRow[airgapColIndices.W]),
           };
           
           return {
             serial,
             part,
             rawRow: rawRow, // Keep raw row for reference
-            // Include both pre-toggle (N, O, P, Q) and post-toggle (R, S, T, U) columns
-            N: airgapValues.N,
-            O: airgapValues.O,
+            // Include both pre-toggle (P, Q, R, S) and post-toggle (T, U, V, W) columns
             P: airgapValues.P,
             Q: airgapValues.Q,
             R: airgapValues.R,
             S: airgapValues.S,
             T: airgapValues.T,
             U: airgapValues.U,
+            V: airgapValues.V,
+            W: airgapValues.W,
           };
         }).filter((item) => {
           // Filter: require both serial AND part to be present (as per user requirement)

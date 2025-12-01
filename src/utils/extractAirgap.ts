@@ -5,11 +5,11 @@ import {
 import type { MergedData, AirgapPoint, TechformData } from './types';
 
 
-// Removed extractAllNumericColumns - we only use columns N, O, P, Q now
+// Removed extractAllNumericColumns - we only use columns P, Q, R, S now
 
 /**
  * Extracts pre-toggle airgap values from merged data
- * ONLY uses columns N, O, P, Q from the raw airgap data sheet
+ * ONLY uses columns P, Q, R, S from the raw airgap data sheet
  * Focuses on pre-toggle only for now
  */
 export function extractAirgapValues(mergedData: MergedData[]): MergedData[] {
@@ -24,7 +24,7 @@ export function extractAirgapValues(mergedData: MergedData[]): MergedData[] {
     const preToggle: { [col: string]: number | null } = {};
     const postToggle: { [col: string]: number | null } = {};
     
-    // ONLY extract from columns N, O, P, Q (the 4 airgap columns from raw airgap data)
+    // ONLY extract from columns P, Q, R, S (the 4 airgap columns from raw airgap data)
     for (const col of PRE_TOGGLE_COLS) {
       const value = (item as any)[col];
       if (value !== null && value !== undefined && value !== '') {
@@ -204,7 +204,7 @@ export function techformDataToAirgapPoints(techformData: TechformData[]): Airgap
   const points: AirgapPoint[] = [];
 
   for (const item of techformData) {
-    // Extract pre-toggle values from N, O, P, Q columns
+    // Extract pre-toggle values from P, Q, R, S columns
     const preCols = PRE_TOGGLE_COLS.filter(col => {
       const value = (item as any)[col];
       return value !== null && value !== undefined && value !== '';
