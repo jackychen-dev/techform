@@ -146,9 +146,16 @@ function findNestPositions(worksheet: XLSX.WorkSheet, sheetName: string): Map<nu
 /**
  * Parses a checked fixture sheet with the specific structure:
  * - Nest numbers at row 13 in various columns (D13, I13, N13, etc.)
- * - Measurement value directly below nest number (row 14+)
+ * - Fixture measurement value directly below nest number (row 14+)
  * - Serial number to the right of measurement (typically F14 for Nest 3)
- * - Airgap values in columns P, Q, R, S
+ * 
+ * NOTE: This parser ONLY extracts:
+ * 1. Serial numbers
+ * 2. Part types (from nest numbers)
+ * 3. Fixture measurement values (from nest column)
+ * 4. Metadata (sourceFile, sheetName)
+ * 
+ * It does NOT extract airgap sensor values - those come from raw airgap data files only!
  */
 export function parseCheckedFixtureSheet(
   worksheet: XLSX.WorkSheet,
@@ -187,8 +194,10 @@ export function parseCheckedFixtureSheet(
   
   console.log(`Using row ${headerRow} as header row for sheet "${sheetName}"`);
   
-  // Airgap columns (P, Q, R, S) - these contain the actual airgap values
-  const airgapCols = ['P', 'Q', 'R', 'S'];
+  // NOTE: We do NOT extract airgap columns from checked fixture files!
+  // The checked fixture file only provides fixture measurement (from nest column)
+  // Airgap sensor readings (P, Q, R, S, T, U, V, W) ONLY come from raw airgap data files
+  // These columns in the checked fixture file contain fixture measurements, not airgap sensors
   
   // Find the data range - look for rows with data starting from headerRow + 1
   const dataStartRow = headerRow + 1;
@@ -334,10 +343,6 @@ export function parseCheckedFixtureSheet(
         continue;
       }
       
-      // Get airgap values - the measurement value is in the nest column itself (directly below nest label)
-      // The measurement value at nestCol, row is the airgap value for this nest
-      const airgapValues: { [col: string]: number | null } = {};
-      
       // Extract fixture measurement from nest column - this is the X-axis value
       // Should be small decimals (-0.80 to 0.80), not whole numbers or serial numbers
       let validMeasurement = null;
@@ -395,31 +400,13 @@ export function parseCheckedFixtureSheet(
         console.log(`Measurement extraction for Nest ${nestNum} at ${nestCol}${row}:`, JSON.stringify(debugInfo, null, 2));
       }
       
-      // Get airgap sensor readings from columns P, Q, R, S
-      // These are the Y-axis values (can be larger numbers, not restricted to -0.80 to 0.80)
-      // Only exclude serial numbers (integers >= 1000)
-      for (const airgapCol of airgapCols) {
-        // Skip column if it's the serial column for this nest
-        if (airgapCol === serialCol) {
-          continue; // Don't use serial numbers as airgap values
-        }
-        
-        const value = getCellValue(worksheet, airgapCol, row);
-        if (value !== null && value !== undefined && value !== '') {
-          const numValue = Number(value);
-          // Accept any numeric value except serial numbers (integers >= 1000)
-          // Airgap sensor readings can be larger numbers (up to 80+)
-          if (!isNaN(numValue) && isFinite(numValue) && 
-              !(Number.isInteger(numValue) && numValue >= 1000)) {
-            airgapValues[airgapCol] = numValue;
-          }
-        }
-      }
-      
-      // Skip if we have no valid airgap measurements
-      if (Object.keys(airgapValues).length === 0) {
-        continue;
-      }
+      // NOTE: We do NOT extract airgap sensor values from the checked fixture file!
+      // Airgap values (P, Q, R, S, T, U, V, W) ONLY come from the raw airgap data file.
+      // The checked fixture file ONLY provides:
+      // 1. Serial number
+      // 2. Part type  
+      // 3. Fixture measurement (from nest column)
+      // 4. Metadata (sourceFile, sheetName)
       
       hasData = true;
       
@@ -433,8 +420,8 @@ export function parseCheckedFixtureSheet(
       // Serial should already be validated above, but double-check
       const finalSerial = String(serial).trim();
       
-      // Create data object with all airgap values as properties
-      // Also store the fixture measurement value for X-axis plotting
+      // Create data object with ONLY metadata and fixture measurement
+      // DO NOT include airgap sensor values - those come from raw airgap file only!
       const rowData: EclipseData = {
         serial: finalSerial,
         part: part,
@@ -442,7 +429,7 @@ export function parseCheckedFixtureSheet(
         sheetName: sheetName,
         rawRow: undefined, // We'll preserve the raw row if needed
         fixtureMeasurement: validMeasurement, // Store fixture measurement for X-axis (from nest column)
-        ...airgapValues, // Spread airgap values as properties (P, Q, R, S)
+        // NO airgap columns here! They come from raw airgap data only.
       };
       
       results.push(rowData);
@@ -476,10 +463,8 @@ export function parseCheckedFixtureSheet(
       results.slice(0, sampleCount).map(r => ({
         serial: r.serial,
         part: r.part,
-        N: r.N,
-        O: r.O,
-        P: r.P,
-        Q: r.Q
+        fixtureMeasurement: r.fixtureMeasurement,
+        sourceFile: r.sourceFile
       })));
     
     // Show unique serials from this sheet
