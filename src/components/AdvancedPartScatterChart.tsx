@@ -271,13 +271,15 @@ export default function AdvancedPartScatterChart({ data, part, state: initialSta
   positions.forEach((position) => {
     const points = positionGroupsFiltered.get(position) || [];
     
-    points.forEach((point, pointIndex) => {
-      const xValue = point.measurement !== null && point.measurement !== undefined
-        ? point.measurement
-        : pointIndex;
+    points.forEach((point) => {
+      // ONLY use fixture measurement for X-axis
+      // Do NOT use index as fallback - skip points without fixture measurement
+      if (point.measurement === null || point.measurement === undefined) {
+        return; // Skip this point - no fixture measurement available
+      }
       
       scatterData.push({
-        x: xValue,
+        x: point.measurement,
         y: point.value,
         position: position,
         serial: point.serial,
@@ -332,12 +334,13 @@ export default function AdvancedPartScatterChart({ data, part, state: initialSta
   const seriesData = positions.map((position, index) => {
     const points = positionGroupsFiltered.get(position) || [];
     
+    // Filter out points without fixture measurements
+    const validPoints = points.filter(p => p.measurement !== null && p.measurement !== undefined);
+    
     return {
       name: `Airgap ${index + 1} (${position})`,
-      data: points.map((point, idx) => ({
-        x: point.measurement !== null && point.measurement !== undefined
-          ? point.measurement
-          : idx,
+      data: validPoints.map((point) => ({
+        x: point.measurement!,
         y: point.value,
         serial: point.serial,
         position: position,

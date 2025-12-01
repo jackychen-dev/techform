@@ -77,8 +77,24 @@ function App() {
 
         // Parse all checked fixture files using the new parser
         console.log('=== PARSING CHECKED FIXTURE FILES ===');
+        console.log(`Parsing ${checkedFixtureFiles.length} checked fixture files...`);
         const eclipseData = await parseAllCheckedFixtureFiles(checkedFixtureFiles);
         console.log(`Parsed ${eclipseData.length} rows from checked fixture files`);
+        
+        // Debug: Check if fixture measurements exist
+        if (eclipseData.length > 0) {
+          const withMeasurement = eclipseData.filter(d => 'fixtureMeasurement' in d && d.fixtureMeasurement !== null && d.fixtureMeasurement !== undefined);
+          console.log(`Checked fixture rows with fixtureMeasurement: ${withMeasurement.length} / ${eclipseData.length}`);
+          if (withMeasurement.length > 0) {
+            console.log('Sample fixture measurements:', withMeasurement.slice(0, 5).map(d => ({
+              serial: d.serial,
+              part: d.part,
+              fixtureMeasurement: d.fixtureMeasurement
+            })));
+          } else {
+            console.warn('⚠️ NO FIXTURE MEASUREMENTS found in checked fixture data!');
+          }
+        }
         
         // Count parts in checked fixture data
         const fixturePartCounts: { [key: string]: number } = {};

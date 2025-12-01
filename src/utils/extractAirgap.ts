@@ -24,6 +24,23 @@ export function extractAirgapValues(mergedData: MergedData[]): MergedData[] {
     const preToggle: { [col: string]: number | null } = {};
     const postToggle: { [col: string]: number | null } = {};
     
+    // Debug: log what columns exist in the first item
+    if (index === 0) {
+      console.log('Available columns in merged item:', Object.keys(item));
+      console.log('PRE_TOGGLE_COLS:', PRE_TOGGLE_COLS);
+      console.log('POST_TOGGLE_COLS:', POST_TOGGLE_COLS);
+      console.log('Raw values:', {
+        P: (item as any).P,
+        Q: (item as any).Q,
+        R: (item as any).R,
+        S: (item as any).S,
+        T: (item as any).T,
+        U: (item as any).U,
+        V: (item as any).V,
+        W: (item as any).W,
+      });
+    }
+    
     // ONLY extract from columns P, Q, R, S (the 4 airgap columns from raw airgap data)
     for (const col of PRE_TOGGLE_COLS) {
       const value = (item as any)[col];

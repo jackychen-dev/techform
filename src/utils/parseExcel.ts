@@ -416,7 +416,7 @@ export async function parseTechformFile(file: File): Promise<TechformData[]> {
             });
           }
           
-          // Get serial from column B (index 1) using raw row data
+          // Get serial from column C (index 2) using raw row data
           const serialRaw = rawRow[serialColIndex];
           let serial = '';
           
@@ -450,7 +450,7 @@ export async function parseTechformFile(file: File): Promise<TechformData[]> {
             }
           }
           
-          // Get Nest/Part from column A (index 0) using raw row data
+          // Get Nest/Part from column D (index 3) using raw row data
           const partValueRaw = rawRow[nestColIndex];
           const partValue = partValueRaw !== null && partValueRaw !== undefined && partValueRaw !== ''
             ? partValueRaw

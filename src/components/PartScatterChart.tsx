@@ -252,18 +252,19 @@ export default function PartScatterChart({ data, part, state: initialState }: Pa
     }
     
     points.forEach((point, pointIndex) => {
-      // Use fixture measurement for X-axis if available, otherwise use index as fallback
-      const xValue = point.measurement !== null && point.measurement !== undefined
-        ? point.measurement
-        : pointIndex; // Fallback to index if no measurement
+      // ONLY use fixture measurement for X-axis
+      // Do NOT use index as fallback - skip points without fixture measurement
+      if (point.measurement === null || point.measurement === undefined) {
+        return; // Skip this point - no fixture measurement available
+      }
       
       scatterData.push({
-        x: xValue,
+        x: point.measurement,
         y: point.value,
         position: position,
         serial: point.serial,
         part: point.part,
-        sheetName: point.sheetName, // Include sheet name from fixture data
+        sheetName: point.sheetName,
       });
     });
   });
@@ -329,12 +330,13 @@ export default function PartScatterChart({ data, part, state: initialState }: Pa
       console.log(`X-axis values for position ${position} (first 10):`, JSON.stringify(xAxisDebug, null, 2));
     }
     
+    // Filter out points without fixture measurements
+    const validPoints = points.filter(p => p.measurement !== null && p.measurement !== undefined);
+    
     return {
       name: `Airgap ${index + 1} (${position})`,
-      data: points.map((point, idx) => ({
-        x: point.measurement !== null && point.measurement !== undefined
-          ? point.measurement
-          : idx, // Fallback to index if no measurement
+      data: validPoints.map((point) => ({
+        x: point.measurement!,
         y: point.value,
         serial: point.serial,
         position: position,
