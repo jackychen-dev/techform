@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import FileUploader from './components/FileUploader';
 import SummaryStats from './components/SummaryStats';
 import PartDashboard from './components/PartDashboard';
+import DataScienceDashboard from './components/DataScienceDashboard';
 import Tabs from './components/Tabs';
 import {
   parseTechformFile,
@@ -352,24 +353,19 @@ function App() {
           {activeTab === 'datascience' && (
             <div>
               {airgapPoints.length > 0 ? (
-                <div className="rounded-lg shadow-sm border-2 border-blue-400 p-6" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.98) 100%)' }}>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    Data Science Analysis
-                  </h2>
-                  <div className="rounded-lg p-12 text-center border-2 border-dashed border-blue-400" style={{ background: 'linear-gradient(135deg, rgba(249, 250, 251, 0.6) 0%, rgba(243, 244, 246, 0.4) 100%)' }}>
-                    <p className="text-gray-700 text-lg mb-2">
-                      Data Science analysis coming soon
-                    </p>
-                    <p className="text-gray-500 text-sm">
-                      {airgapPoints.length} data points available for analysis
-                    </p>
-                  </div>
-                </div>
+                <DataScienceDashboard data={airgapPoints} />
               ) : (
-                <div className="rounded-lg shadow-sm border-2 border-blue-400 p-12 text-center" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.98) 100%)' }}>
-                  <p className="text-gray-700 text-lg">
-                    No data available. Please upload files in the File Upload tab.
+                <div className="rounded-lg shadow-sm border-2 border-purple-400 p-12 text-center" style={{ background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.98) 100%)' }}>
+                  <p className="text-gray-700 text-lg mb-4">
+                    {mergedData.length > 0
+                      ? 'Click "Generate Dashboard" in the File Upload tab to create visualizations'
+                      : 'No data available. Please upload files in the File Upload tab.'}
                   </p>
+                  {mergedData.length > 0 && (
+                    <p className="text-sm text-gray-500">
+                      {mergedData.length} merged records ready to visualize
+                    </p>
+                  )}
                 </div>
               )}
             </div>
