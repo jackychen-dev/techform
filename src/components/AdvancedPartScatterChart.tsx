@@ -174,7 +174,9 @@ export default function AdvancedPartScatterChart({ data, part, state: initialSta
       // Check if any left airgap >= any right airgap + margin
       let shouldReject = false;
       for (const leftPoint of leftPoints) {
+        if (!leftPoint || leftPoint.value === null) continue;
         for (const rightPoint of rightPoints) {
+          if (!rightPoint || rightPoint.value === null) continue;
           const leftVal = Math.abs(Number(leftPoint.value));
           const rightVal = Math.abs(Number(rightPoint.value));
           
@@ -266,7 +268,7 @@ export default function AdvancedPartScatterChart({ data, part, state: initialSta
     ? Array.from(positionGroupsFiltered.keys()).sort()
     : allPositions;
   
-  positions.forEach((position, posIndex) => {
+  positions.forEach((position) => {
     const points = positionGroupsFiltered.get(position) || [];
     
     points.forEach((point, pointIndex) => {
@@ -544,9 +546,9 @@ export default function AdvancedPartScatterChart({ data, part, state: initialSta
                       <div className="text-xs text-gray-500 italic">
                         {filter.leftAirgaps.length > 0 && filter.rightAirgaps.length > 0 && (
                           <>
-                            Rejects if any of [{filter.leftAirgaps.map((p, i) => `Airgap ${allPositions.indexOf(p) + 1}`).join(', ')}] 
+                            Rejects if any of [{filter.leftAirgaps.map((p) => `Airgap ${allPositions.indexOf(p) + 1}`).join(', ')}] 
                             {' > '}
-                            any of [{filter.rightAirgaps.map((p, i) => `Airgap ${allPositions.indexOf(p) + 1}`).join(', ')}]
+                            any of [{filter.rightAirgaps.map((p) => `Airgap ${allPositions.indexOf(p) + 1}`).join(', ')}]
                             {filter.margin && ` by ${filter.margin} or more`}
                           </>
                         )}
