@@ -1,24 +1,24 @@
 # Airgap Comparison Dashboard
 
-A React + Vite web application for comparing Techform and Eclipse fixture airgap measurements. The app runs 100% client-side and can be deployed as a static website.
+A React + Vite web application for comparing airgap measurements between Techform raw data and Eclipse fixture results. The application runs 100% client-side and can be deployed as a static website.
 
 ## Features
 
-- Upload Excel files (Techform + multiple Eclipse files)
-- Automatic file detection and parsing
-- Parse multiple sheets from Eclipse files
-- Merge data by serial and part
-- Visualize pre-toggle vs post-toggle airgap measurements
-- Aggregate statistics across all matched serials
+- **File Upload**: Drag-and-drop Excel file uploads (.xlsx, .xlsm, .xls)
+- **Data Parsing**: Automatic parsing of multiple sheets from Excel files
+- **Data Merging**: Intelligent matching of serial numbers and parts across files
+- **Visualization**: Interactive scatter charts for each part type with pre/post toggle comparison
+- **Filtering**: Per-airgap filtering with rejection statistics
+- **Statistics**: Comprehensive fixture statistics (range, median, average, span)
 
 ## Tech Stack
 
 - React 18 + TypeScript
 - Vite
-- SheetJS (xlsx) for Excel parsing
-- Recharts for data visualization
-- Tailwind CSS for styling
-- React Dropzone for file uploads
+- Tailwind CSS
+- Recharts
+- SheetJS (xlsx)
+- React Dropzone
 
 ## Getting Started
 
@@ -40,40 +40,29 @@ npm run dev
 npm run build
 ```
 
-The built files will be in the `dist` directory, ready for static deployment.
-
-## Configuration
-
-Edit `src/utils/constants.ts` to configure:
-
-- Column names for Serial and Part
-- Valid parts filter
-- Pre-toggle and post-toggle column letters
-- File name prefixes
-
-## File Requirements
-
-### Techform File
-- Exactly one file
-- Filename must start with: "Techform Read Probe Values"
-- Must contain columns: Serial, Part
-
-### Eclipse Files
-- Multiple files allowed
-- Filenames must start with: "Eclipse Check Fixture Sheet Share"
-- Each file can contain multiple sheets (one per date)
-- Must contain columns: Serial, Part
-
 ## Deployment
 
-This app can be deployed to any static hosting service:
+This application is designed to be deployed as a static website. The build output in the `dist` folder can be deployed to:
 
-- **Vercel**: `vercel --prod`
-- **Netlify**: Drag and drop the `dist` folder
-- **GitHub Pages**: Configure to serve from `dist` directory
+- Vercel
+- Netlify
+- GitHub Pages
+- Any static hosting service
 
-## License
+## Usage
 
-MIT
+1. Upload Raw Airgap Data files (Excel format)
+2. Upload Checked Fixture files (Excel format)
+3. Click "Generate Dashboard" to create visualizations
+4. View charts in the Dashboard tab
+5. Use filters to exclude data points above threshold values
 
+## Project Structure
 
+```
+src/
+├── components/     # React components
+├── utils/         # Utility functions for parsing and data processing
+├── App.tsx        # Main application component
+└── main.tsx       # Entry point
+```
