@@ -1,13 +1,3 @@
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
 import { VALID_PARTS } from '../utils/constants';
 import type { AirgapPoint } from '../utils/types';
 import PartScatterChart from './PartScatterChart';
@@ -15,18 +5,6 @@ import PartScatterChart from './PartScatterChart';
 interface PartDashboardProps {
   data: AirgapPoint[];
 }
-
-// Color palette for the 8 parts
-const PART_COLORS: { [key: string]: { pre: string; post: string; bg: string } } = {
-  FRU: { pre: '#3b82f6', post: '#10b981', bg: 'bg-blue-50' },
-  FRL: { pre: '#8b5cf6', post: '#14b8a6', bg: 'bg-purple-50' },
-  FLU: { pre: '#f59e0b', post: '#06b6d4', bg: 'bg-amber-50' },
-  FLL: { pre: '#ef4444', post: '#22c55e', bg: 'bg-red-50' },
-  RRU: { pre: '#6366f1', post: '#84cc16', bg: 'bg-indigo-50' },
-  RRL: { pre: '#ec4899', post: '#10b981', bg: 'bg-pink-50' },
-  RLU: { pre: '#14b8a6', post: '#f59e0b', bg: 'bg-teal-50' },
-  RLL: { pre: '#06b6d4', post: '#8b5cf6', bg: 'bg-cyan-50' },
-};
 
 export default function PartDashboard({ data }: PartDashboardProps) {
   // Group data by part
@@ -39,39 +17,6 @@ export default function PartDashboard({ data }: PartDashboardProps) {
     partDataMap.get(point.part)!.push(point);
   }
 
-  // Prepare chart data for each part
-  const prepareChartData = (partPoints: AirgapPoint[]) => {
-    // Get all unique positions from the data (handles both letter-based and named columns)
-    const allPositions = [...new Set(partPoints.map(p => p.position))].sort();
-    const chartData: any[] = [];
-
-    for (const position of allPositions) {
-      const prePoints = partPoints.filter(
-        (p) => p.position === position && p.state === 'pre' && p.value !== null
-      );
-      const postPoints = partPoints.filter(
-        (p) => p.position === position && p.state === 'post' && p.value !== null
-      );
-
-      // Calculate averages if multiple values exist
-      const preAvg = prePoints.length > 0
-        ? prePoints.reduce((sum, p) => sum + (p.value || 0), 0) / prePoints.length
-        : null;
-      const postAvg = postPoints.length > 0
-        ? postPoints.reduce((sum, p) => sum + (p.value || 0), 0) / postPoints.length
-        : null;
-
-      chartData.push({
-        position,
-        pre: preAvg,
-        post: postAvg,
-        preCount: prePoints.length,
-        postCount: postPoints.length,
-      });
-    }
-
-    return chartData;
-  };
 
   if (data.length === 0) {
     return (

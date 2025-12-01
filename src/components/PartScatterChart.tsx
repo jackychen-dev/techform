@@ -8,7 +8,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Cell,
 } from 'recharts';
 import { NEST_TO_PART_MAP } from '../utils/constants';
 import type { AirgapPoint } from '../utils/types';
@@ -288,7 +287,6 @@ export default function PartScatterChart({ data, part, state: initialState }: Pa
   let fixtureRange = 'N/A';
   let fixtureMedian = 'N/A';
   let fixtureAverage = 'N/A';
-  let filteredFixtureRange = 'N/A';
   let fixtureSpan = 'N/A';
   
   if (fixtureMeasurements.length > 0) {
@@ -296,9 +294,6 @@ export default function PartScatterChart({ data, part, state: initialState }: Pa
     const min = sorted[0];
     const max = sorted[sorted.length - 1];
     fixtureRange = `${min.toFixed(2)} to ${max.toFixed(2)}`;
-    
-    // Calculate filtered fixture range (actual range after filtering)
-    filteredFixtureRange = `${min.toFixed(2)} to ${max.toFixed(2)}`;
     
     // Calculate span (difference between max and min)
     const span = max - min;
@@ -531,7 +526,7 @@ export default function PartScatterChart({ data, part, state: initialState }: Pa
               
               // Custom shape component based on type
               const CustomShape = (props: any) => {
-                const { cx, cy, payload } = props;
+                const { cx, cy } = props;
                 const size = 6;
                 
                 switch (shapeType) {

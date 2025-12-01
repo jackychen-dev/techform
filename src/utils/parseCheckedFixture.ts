@@ -383,7 +383,7 @@ export function parseCheckedFixtureSheet(
           reason: validMeasurement === null 
             ? (measurement === null || measurement === undefined || measurement === '' 
                 ? 'empty' 
-                : isNaN(numVal) || !isFinite(numVal)
+                : numVal === null || isNaN(numVal) || !isFinite(numVal)
                   ? 'not a number'
                   : !inRange
                     ? 'out of range'
@@ -440,7 +440,7 @@ export function parseCheckedFixtureSheet(
         part: part,
         sourceFile: fileName,
         sheetName: sheetName,
-        rawRow: null, // We'll preserve the raw row if needed
+        rawRow: undefined, // We'll preserve the raw row if needed
         fixtureMeasurement: validMeasurement, // Store fixture measurement for X-axis (from nest column)
         ...airgapValues, // Spread airgap values as properties (N, O, P, Q)
       };

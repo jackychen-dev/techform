@@ -1,7 +1,5 @@
 import * as XLSX from 'xlsx';
 import {
-  TECHFORM_SERIAL_COL,
-  TECHFORM_SERIAL_NUMBER_COL,
   TECHFORM_PART_COL,
   TECHFORM_NEST_COL,
   ECLIPSE_SERIAL_COL,
@@ -32,22 +30,19 @@ export function isEclipseFile(filename: string): boolean {
  */
 export function categorizeFiles(files: File[]): FileUploadResult {
   const result: FileUploadResult = {
-    techformFile: null,
-    eclipseFiles: [],
+    rawAirgapFiles: [],
+    checkedFixtureFiles: [],
   };
 
   for (const file of files) {
     if (isTechformFile(file.name)) {
-      if (result.techformFile) {
-        throw new Error('Multiple Techform files detected. Please upload exactly one Techform file.');
-      }
-      result.techformFile = file;
+      result.rawAirgapFiles.push(file);
     } else if (isEclipseFile(file.name)) {
-      result.eclipseFiles.push(file);
+      result.checkedFixtureFiles.push(file);
     }
   }
 
-  if (!result.techformFile) {
+  if (result.rawAirgapFiles.length === 0) {
     throw new Error('No Techform file detected. Please upload a file starting with "Techform Read Probe Values".');
   }
 
@@ -156,8 +151,9 @@ export async function parseTechformFile(file: File): Promise<TechformData[]> {
         // Also find by name as fallback for validation
         const firstRow = rows[0];
         const availableColumns = Object.keys(firstRow);
-        const nestCol = findColumnKey(availableColumns, TECHFORM_NEST_COL);
-        const partCol = findColumnKey(availableColumns, TECHFORM_PART_COL);
+        // Find columns for validation (not used in parsing but kept for potential future use)
+        findColumnKey(availableColumns, TECHFORM_NEST_COL);
+        findColumnKey(availableColumns, TECHFORM_PART_COL);
         
         // Validate that we have data
         if (rows.length === 0) {
@@ -207,7 +203,7 @@ export async function parseTechformFile(file: File): Promise<TechformData[]> {
 
         // Map rows with ONLY columns N, O, P, Q from raw data
         // Use rawRows to access by column index (A=0, B=1, N=13, O=14, P=15, Q=16)
-        const parsed: TechformData[] = rows.map((row, index) => {
+        const parsed: TechformData[] = rows.map((_row, index) => {
           // rawRows[0] is the header row, so data starts at rawRows[1]
           const rawRow = rawRows[index + 1] || []; // +1 to skip header row
           

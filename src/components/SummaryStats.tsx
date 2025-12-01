@@ -1,5 +1,4 @@
 import { FileText, Database, Package, AlertCircle } from 'lucide-react';
-import type { MergedData, EclipseData } from '../utils/types';
 
 interface SummaryStatsProps {
   eclipseSheetCount: number;

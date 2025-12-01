@@ -100,15 +100,11 @@ export function mergeData(
       // Merge the data
       // IMPORTANT: Spread order matters - eclipseItem last so fixtureMeasurement is preserved
       const mergedItem: MergedData = {
-        serial: techformItem.serial, // Use raw airgap serial (source of truth)
-        part: techformItem.part,
-        sourceFile: eclipseItem.sourceFile,
-        sheetName: eclipseItem.sheetName,
         preToggle: {},
         postToggle: {},
         rawRow: techformItem.rawRow || eclipseItem.rawRow,
-        ...techformItem, // Preserve all raw airgap data (has the measurements N, O, P, Q)
-        ...eclipseItem, // Then overlay Eclipse data (has metadata including fixtureMeasurement)
+        ...techformItem, // Preserve all raw airgap data (has serial, part, measurements N, O, P, Q)
+        ...eclipseItem, // Then overlay Eclipse data (has sourceFile, sheetName, fixtureMeasurement)
       };
       
       // Debug: log fixtureMeasurement preservation for first few matches
