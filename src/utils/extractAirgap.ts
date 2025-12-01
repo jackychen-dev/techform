@@ -46,7 +46,7 @@ export function extractAirgapValues(mergedData: MergedData[]): MergedData[] {
       }
     }
     
-    // Extract post-toggle values from columns R, S, T, U (from raw airgap data)
+    // Extract post-toggle values from columns T, U, V, W (from raw airgap data)
     for (const col of POST_TOGGLE_COLS) {
       const value = (item as any)[col];
       if (value !== null && value !== undefined && value !== '') {
@@ -73,16 +73,27 @@ export function extractAirgapValues(mergedData: MergedData[]): MergedData[] {
       console.log('First item extraction:', {
         serial: item.serial,
         part: item.part,
-        hasN: 'N' in item,
-        hasO: 'O' in item,
         hasP: 'P' in item,
         hasQ: 'Q' in item,
-        N: (item as any).N,
-        O: (item as any).O,
+        hasR: 'R' in item,
+        hasS: 'S' in item,
+        hasT: 'T' in item,
+        hasU: 'U' in item,
+        hasV: 'V' in item,
+        hasW: 'W' in item,
         P: (item as any).P,
         Q: (item as any).Q,
+        R: (item as any).R,
+        S: (item as any).S,
+        T: (item as any).T,
+        U: (item as any).U,
+        V: (item as any).V,
+        W: (item as any).W,
+        hasFixtureMeasurement: 'fixtureMeasurement' in item,
+        fixtureMeasurement: (item as any).fixtureMeasurement,
         preToggle,
-        allKeys: Object.keys(item).slice(0, 15)
+        postToggle,
+        allKeys: Object.keys(item).slice(0, 20)
       });
     }
 
@@ -184,11 +195,32 @@ export function toTidyFormat(mergedData: MergedData[]): AirgapPoint[] {
     }
   }
 
+  const prePoints = points.filter(p => p.state === 'pre');
+  const postPoints = points.filter(p => p.state === 'post');
+  
   console.log(`Created ${points.length} airgap points from ${mergedData.length} items`);
+  console.log(`  - Pre-toggle points: ${prePoints.length} (from columns P, Q, R, S)`);
+  console.log(`  - Post-toggle points: ${postPoints.length} (from columns T, U, V, W)`);
+  
   if (points.length > 0) {
     console.log('Sample points:', points.slice(0, 3));
     console.log('Unique parts:', [...new Set(points.map(p => p.part))]);
-    console.log('Unique positions:', [...new Set(points.map(p => p.position))]);
+    console.log('Unique positions (pre):', [...new Set(prePoints.map(p => p.position))]);
+    console.log('Unique positions (post):', [...new Set(postPoints.map(p => p.position))]);
+    
+    // Check fixture measurement presence
+    const pointsWithMeasurement = points.filter(p => p.measurement !== null && p.measurement !== undefined);
+    console.log(`Points with fixture measurement: ${pointsWithMeasurement.length} / ${points.length}`);
+    if (pointsWithMeasurement.length > 0) {
+      console.log('Sample measurements:', pointsWithMeasurement.slice(0, 5).map(p => ({
+        serial: p.serial,
+        measurement: p.measurement,
+        value: p.value,
+        position: p.position
+      })));
+    } else {
+      console.warn('⚠️ NO FIXTURE MEASUREMENTS FOUND! Check if checked fixture file has data.');
+    }
   } else {
     console.warn('⚠️ No airgap points created!');
   }

@@ -119,7 +119,13 @@ export function mergeData(
           hasFixtureMeasurement: 'fixtureMeasurement' in mergedItem,
           fixtureMeasurement: (mergedItem as any).fixtureMeasurement,
           eclipseFixtureMeasurement: (eclipseItem as any).fixtureMeasurement,
-          allKeys: Object.keys(mergedItem).filter(k => k.includes('measurement') || k.includes('Measurement') || k === 'N' || k === 'O' || k === 'P' || k === 'Q')
+          allKeys: Object.keys(mergedItem).filter(k => k.includes('measurement') || k.includes('Measurement') || k === 'P' || k === 'Q' || k === 'R' || k === 'S' || k === 'T' || k === 'U' || k === 'V' || k === 'W'),
+          P: (mergedItem as any).P,
+          Q: (mergedItem as any).Q,
+          R: (mergedItem as any).R,
+          S: (mergedItem as any).S,
+          T: (mergedItem as any).T,
+          U: (mergedItem as any).U
         });
       }
       

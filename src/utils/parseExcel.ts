@@ -229,7 +229,7 @@ async function parseCSVFile(file: File): Promise<TechformData[]> {
             }
           }
           
-          const airgapValues: { [key: string]: number | null } = {
+          const airgapValues = {
             P: validateAirgapValue(row[airgapColIndices.P]),
             Q: validateAirgapValue(row[airgapColIndices.Q]),
             R: validateAirgapValue(row[airgapColIndices.R]),
@@ -244,6 +244,7 @@ async function parseCSVFile(file: File): Promise<TechformData[]> {
             serial,
             part,
             rawRow: row,
+            // Include both pre-toggle (P, Q, R, S) and post-toggle (T, U, V, W) columns
             P: airgapValues.P,
             Q: airgapValues.Q,
             R: airgapValues.R,
@@ -525,7 +526,8 @@ export async function parseTechformFile(file: File): Promise<TechformData[]> {
             return numValue; // Allow any other numeric value
           };
           
-          const airgapValues: { [key: string]: number | null } = {
+          // Extract values by index to avoid header name issues
+          const airgapValues = {
             P: validateAirgapValue(rawRow[airgapColIndices.P]),
             Q: validateAirgapValue(rawRow[airgapColIndices.Q]),
             R: validateAirgapValue(rawRow[airgapColIndices.R]),
@@ -536,11 +538,29 @@ export async function parseTechformFile(file: File): Promise<TechformData[]> {
             W: validateAirgapValue(rawRow[airgapColIndices.W]),
           };
           
+          // Debug: log airgap values for first few rows
+          if (index < 3) {
+            console.log(`Excel Row ${index + 1} airgap extraction:`, {
+              serial,
+              part,
+              P: airgapValues.P,
+              Q: airgapValues.Q,
+              R: airgapValues.R,
+              S: airgapValues.S,
+              T: airgapValues.T,
+              U: airgapValues.U,
+              V: airgapValues.V,
+              W: airgapValues.W,
+              rawRowLength: rawRow.length
+            });
+          }
+          
           return {
             serial,
             part,
             rawRow: rawRow, // Keep raw row for reference
             // Include both pre-toggle (P, Q, R, S) and post-toggle (T, U, V, W) columns
+            // Store with column letter keys for consistent access
             P: airgapValues.P,
             Q: airgapValues.Q,
             R: airgapValues.R,
