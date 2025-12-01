@@ -405,6 +405,19 @@ export function parseCheckedFixtureSheet(
       // 3. Fixture measurement (from nest column)
       // 4. Metadata (sourceFile, sheetName)
       
+      // Debug: Log what we're about to add
+      if (results.length < 5) {
+        console.log(`Adding row ${row} for Nest ${nestNum}:`, {
+          serial,
+          nestNum,
+          part: NEST_TO_PART_MAP[nestNum],
+          measurement,
+          validMeasurement,
+          measurementType: typeof measurement,
+          validMeasurementType: typeof validMeasurement
+        });
+      }
+      
       hasData = true;
       
       // Convert nest to part name - ensure it's a valid part

@@ -251,7 +251,7 @@ export default function PartScatterChart({ data, part, state: initialState }: Pa
       console.log(`Sample points for position ${position} (first 5):`, JSON.stringify(samplePoints, null, 2));
     }
     
-    points.forEach((point, pointIndex) => {
+    points.forEach((point) => {
       // ONLY use fixture measurement for X-axis
       // Do NOT use index as fallback - skip points without fixture measurement
       if (point.measurement === null || point.measurement === undefined) {

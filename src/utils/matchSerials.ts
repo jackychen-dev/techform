@@ -112,14 +112,19 @@ export function mergeData(
       };
       
       // Debug: log fixtureMeasurement preservation for first few matches
-      if (exactMatchCount < 3) {
-        console.log(`Merge item ${exactMatchCount}:`, {
+      if (exactMatchCount <= 5) {
+        console.log(`\n✓ MERGE MATCH ${exactMatchCount}:`, {
           serial: mergedItem.serial,
           part: mergedItem.part,
           hasFixtureMeasurement: 'fixtureMeasurement' in mergedItem,
           fixtureMeasurement: (mergedItem as any).fixtureMeasurement,
+          fixtureMeasurementType: typeof (mergedItem as any).fixtureMeasurement,
+          eclipseHadFixtureMeasurement: 'fixtureMeasurement' in eclipseItem,
           eclipseFixtureMeasurement: (eclipseItem as any).fixtureMeasurement,
-          allKeys: Object.keys(mergedItem).filter(k => k.includes('measurement') || k.includes('Measurement') || k === 'P' || k === 'Q' || k === 'R' || k === 'S' || k === 'T' || k === 'U' || k === 'V' || k === 'W'),
+          techformHadFixtureMeasurement: 'fixtureMeasurement' in techformItem,
+          techformFixtureMeasurement: (techformItem as any).fixtureMeasurement,
+          eclipseKeys: Object.keys(eclipseItem).filter(k => !k.startsWith('__')),
+          mergedKeys: Object.keys(mergedItem).filter(k => k.includes('measurement') || k.includes('Measurement') || k === 'P' || k === 'Q' || k === 'R' || k === 'S' || k === 'T' || k === 'U' || k === 'V' || k === 'W'),
           P: (mergedItem as any).P,
           Q: (mergedItem as any).Q,
           R: (mergedItem as any).R,
