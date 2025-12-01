@@ -175,7 +175,7 @@ async function parseCSVFile(file: File): Promise<TechformData[]> {
           return numValue;
         };
         
-        const parsed: TechformData[] = dataRows.map((row, index) => {
+        const parsed: TechformData[] = dataRows.map((row) => {
           const serialRaw = row[serialColIndex];
           let serial = '';
           
