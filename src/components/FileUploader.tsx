@@ -52,6 +52,7 @@ export default function FileUploader({
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
       'application/vnd.ms-excel.sheet.macroEnabled.12': ['.xlsm'],
       'application/vnd.ms-excel': ['.xls'],
+      'text/csv': ['.csv'],
     },
     multiple: true,
   });
@@ -106,9 +107,9 @@ export default function FileUploader({
           <p className="text-lg font-medium text-gray-900">
             {rawAirgapDropzone.isDragActive
               ? 'Drop files here'
-              : 'Drag & drop Excel files here'}
+              : 'Drag & drop Excel or CSV files here'}
           </p>
-          <p className="text-sm text-gray-500 mt-2">or click to select files</p>
+          <p className="text-sm text-gray-500 mt-2">or click to select files (.xlsx, .xlsm, .xls, .csv)</p>
         </div>
 
         {rawAirgapFiles.length > 0 && (

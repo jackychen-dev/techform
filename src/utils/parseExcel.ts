@@ -91,9 +91,203 @@ function findColumnKey(columns: string[], targetName: string): string | null {
 }
 
 /**
+ * Parses a CSV file and converts it to the same format as Excel
+ */
+async function parseCSVFile(file: File): Promise<TechformData[]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+        if (!text) {
+          reject(new Error('Failed to read CSV file'));
+          return;
+        }
+        
+        // Parse CSV manually - split by lines and commas
+        const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+        
+        if (lines.length === 0) {
+          reject(new Error('CSV file is empty'));
+          return;
+        }
+        
+        // Parse each line - handle quoted values
+        const parseCSVLine = (line: string): string[] => {
+          const result: string[] = [];
+          let current = '';
+          let inQuotes = false;
+          
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              result.push(current.trim());
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          result.push(current.trim());
+          return result;
+        };
+        
+        const rows = lines.map(line => parseCSVLine(line));
+        
+        // Skip header row (first row)
+        const dataRows = rows.slice(1);
+        
+        console.log(`📋 CSV file structure: ${dataRows.length} data rows`);
+        console.log(`  - Column C (index 2): Serial Number`);
+        console.log(`  - Column D (index 3): Part Type`);
+        console.log(`  - Columns P, Q, R, S (indices 15-18): Pre-toggle airgap values`);
+        console.log(`  - Columns T, U, V, W (indices 19-22): Post-toggle airgap values`);
+        
+        const serialColIndex = 2; // Column C
+        const nestColIndex = 3; // Column D
+        
+        const columnLetterToIndex = (colLetter: string): number => {
+          let colIndex = 0;
+          for (let i = 0; i < colLetter.length; i++) {
+            colIndex = colIndex * 26 + (colLetter.charCodeAt(i) - 64);
+          }
+          return colIndex - 1;
+        };
+        
+        const airgapColIndices = {
+          P: columnLetterToIndex('P'), // 15
+          Q: columnLetterToIndex('Q'), // 16
+          R: columnLetterToIndex('R'), // 17
+          S: columnLetterToIndex('S'), // 18
+          T: columnLetterToIndex('T'), // 19
+          U: columnLetterToIndex('U'), // 20
+          V: columnLetterToIndex('V'), // 21
+          W: columnLetterToIndex('W'), // 22
+        };
+        
+        const validateAirgapValue = (value: any): number | null => {
+          if (value === null || value === undefined || value === '') return null;
+          const numValue = Number(value);
+          if (isNaN(numValue) || !isFinite(numValue)) return null;
+          if (Number.isInteger(numValue) && numValue >= 1000) return null;
+          return numValue;
+        };
+        
+        const parsed: TechformData[] = dataRows.map((row, index) => {
+          const serialRaw = row[serialColIndex];
+          let serial = '';
+          
+          if (serialRaw !== null && serialRaw !== undefined && serialRaw !== '') {
+            const serialStr = String(serialRaw).trim();
+            const serialNum = Number(serialStr);
+            if (!isNaN(serialNum) && Number.isInteger(serialNum) && serialNum > 0) {
+              serial = String(serialNum);
+            } else {
+              const cleanedSerial = serialStr.replace(/[^0-9]/g, '');
+              if (cleanedSerial && cleanedSerial.length > 0) {
+                const cleanedNum = Number(cleanedSerial);
+                if (!isNaN(cleanedNum) && Number.isInteger(cleanedNum) && cleanedNum > 0) {
+                  serial = String(cleanedNum);
+                }
+              }
+            }
+          }
+          
+          const partValueRaw = row[nestColIndex];
+          let part: string = '';
+          
+          if (partValueRaw !== null && partValueRaw !== undefined && partValueRaw !== '') {
+            const partValueStr = String(partValueRaw).trim();
+            
+            let nestNum: number | null = null;
+            
+            if (typeof partValueRaw === 'number') {
+              nestNum = partValueRaw;
+            } else {
+              const numMatch = partValueStr.match(/\b([1-8])\b/);
+              if (numMatch) {
+                nestNum = parseInt(numMatch[1], 10);
+              } else {
+                const parsed = parseInt(partValueStr, 10);
+                if (!isNaN(parsed) && parsed >= 1 && parsed <= 8) {
+                  nestNum = parsed;
+                }
+              }
+            }
+            
+            if (nestNum !== null && NEST_TO_PART_MAP[nestNum]) {
+              part = NEST_TO_PART_MAP[nestNum];
+            } else {
+              const upperPart = partValueStr.toUpperCase();
+              if (VALID_PARTS.includes(upperPart)) {
+                part = upperPart;
+              } else {
+                part = partValueStr;
+              }
+            }
+          }
+          
+          const airgapValues: { [key: string]: number | null } = {
+            P: validateAirgapValue(row[airgapColIndices.P]),
+            Q: validateAirgapValue(row[airgapColIndices.Q]),
+            R: validateAirgapValue(row[airgapColIndices.R]),
+            S: validateAirgapValue(row[airgapColIndices.S]),
+            T: validateAirgapValue(row[airgapColIndices.T]),
+            U: validateAirgapValue(row[airgapColIndices.U]),
+            V: validateAirgapValue(row[airgapColIndices.V]),
+            W: validateAirgapValue(row[airgapColIndices.W]),
+          };
+          
+          return {
+            serial,
+            part,
+            rawRow: row,
+            P: airgapValues.P,
+            Q: airgapValues.Q,
+            R: airgapValues.R,
+            S: airgapValues.S,
+            T: airgapValues.T,
+            U: airgapValues.U,
+            V: airgapValues.V,
+            W: airgapValues.W,
+          };
+        }).filter((item) => {
+          return item.serial && item.serial.trim() !== '' && item.part && item.part.trim() !== '';
+        });
+        
+        const partCounts: { [key: string]: number } = {};
+        parsed.forEach(item => {
+          partCounts[item.part] = (partCounts[item.part] || 0) + 1;
+        });
+        
+        console.log(`\n=== CSV FILE PARSING SUMMARY ===`);
+        console.log(`Parsed ${parsed.length} rows from CSV file`);
+        console.log(`Part counts:`, partCounts);
+        console.log(`================================\n`);
+        
+        resolve(parsed);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    reader.onerror = () => reject(new Error('Failed to read CSV file'));
+    reader.readAsText(file);
+  });
+}
+
+/**
  * Parses a Techform Excel file
  */
 export async function parseTechformFile(file: File): Promise<TechformData[]> {
+  // Check if it's a CSV file
+  if (file.name.toLowerCase().endsWith('.csv')) {
+    return parseCSVFile(file);
+  }
+  
+  // Otherwise parse as Excel
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
