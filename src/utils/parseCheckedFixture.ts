@@ -291,7 +291,6 @@ export function parseCheckedFixtureSheet(
       // N13 (Nest 7) -> O14 (Serial), I13 (Nest 4) -> J14 (Serial)
       // So offset is 1, not 2!
       let serial = null;
-      let serialCol = null;
       
       // Invalid serial patterns to skip
       const invalidSerials = new Set(['n/a', 'fail', 'pass', 'na', 'n/a', '', '0', 'null', 'undefined', 'p']);
@@ -316,7 +315,6 @@ export function parseCheckedFixtureSheet(
           if (!isNaN(numValue) && Number.isInteger(numValue) && numValue > 0) {
             // This is a valid numeric serial at the expected location
             serial = String(Math.round(numValue)); // Round to remove decimals
-            serialCol = testSerialCol;
             if (row === dataStartRow && nestNum === 3) {
               console.log(`✓ Found serial "${serial}" at ${testSerialCol}${row} for Nest ${nestNum} (offset ${expectedOffset})`);
             }
@@ -331,7 +329,6 @@ export function parseCheckedFixtureSheet(
             const testNum = Number(serialStr);
             if (isNaN(testNum) || Math.abs(testNum) >= 100 || Number.isInteger(testNum)) {
               serial = serialStr;
-              serialCol = testSerialCol;
             }
           }
         }
